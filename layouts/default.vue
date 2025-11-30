@@ -5,7 +5,7 @@
         <MainNavbar />
       </template>
     </AppHeader>
-    <main class="mx-auto max-w-6xl px-6 py-10">
+    <main>
       <slot />
     </main>
     <AppFooter />
