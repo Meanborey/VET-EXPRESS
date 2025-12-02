@@ -14,7 +14,12 @@ type DestinationFormPayload = {
 
 type DateField = 'depart' | 'return'
 
-const toInputDate = (date: Date) => date.toISOString().slice(0, 10)
+const toInputDate = (date: Date) => {
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+}
 
 const today = new Date()
 
@@ -136,6 +141,11 @@ const calendarWeeks = computed(() => buildCalendar(calendarCursor.value))
 const isSelectedDate = (date: Date) => {
     const compareValue = activeDateField.value === 'depart' ? form.departDate : form.returnDate
     return compareValue === toInputDate(date)
+}
+
+const isToday = (date: Date) => {
+    const today = new Date()
+    return date.toDateString() === today.toDateString()
 }
 
 const goToPreviousMonth = () => {
@@ -300,6 +310,8 @@ onBeforeUnmount(() => {
                                                     day.inCurrentMonth ? 'text-slate-700' : 'text-slate-300',
                                                     isSelectedDate(day.date)
                                                         ? 'bg-orange-500 text-white shadow'
+                                                        : isToday(day.date)
+                                                        ? 'bg-blue-100 text-blue-600 font-semibold'
                                                         : 'hover:bg-orange-100 hover:text-orange-600'
                                                 ]" @click.stop="selectCalendarDay(day.date)">
                                                 {{ day.date.getDate() }}
@@ -365,6 +377,8 @@ onBeforeUnmount(() => {
                                                     day.inCurrentMonth ? 'text-slate-700' : 'text-slate-300',
                                                     isSelectedDate(day.date)
                                                         ? 'bg-orange-500 text-white shadow'
+                                                        : isToday(day.date)
+                                                        ? 'bg-blue-100 text-blue-600 font-semibold'
                                                         : 'hover:bg-orange-100 hover:text-orange-600'
                                                 ]" @click.stop="selectCalendarDay(day.date)">
                                                 {{ day.date.getDate() }}
