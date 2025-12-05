@@ -4,6 +4,7 @@ import coverimg from '@/assets/images/cover-01.jpg'
 
 <template>
   <section class="w-full h-auto">
+    
     <div class="w-full h-full flex items-center justify-center"> 
       <destination-form />
     </div>

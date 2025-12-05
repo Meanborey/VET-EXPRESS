@@ -11,7 +11,7 @@ defineProps<{
 <template>
 	<div class="bg-white rounded-xl shadow border border-slate-200 p-5 flex flex-col min-w-[260px] max-w-[320px] h-full">
 		<div class="flex items-center gap-2 mb-2">
-			<span class="text-2xl">{{ icon }}</span>
+			<img  :src="icon" alt="Icon" class="w-7 h-7 object-contain" />
 			<span class="font-semibold text-slate-800">{{ title }}</span>
 		</div>
 		<div class="text-xs text-slate-500 mb-4">Apply Period: {{ period }}</div>

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import Card from '@/components/ui/card.vue'
+import brandIcon from '@/assets/images/vireak-buntham.png'
 
 const allCards = [
     {
@@ -9,7 +10,7 @@ const allCards = [
         period: '2025-03-05 to 2035-03-31',
         price: 18,
         oldPrice: 23,
-        icon: '🚉',
+        icon: brandIcon,
     },
     {
         id: 2,
@@ -17,7 +18,7 @@ const allCards = [
         period: '2025-03-05 to 2035-03-31',
         price: 20,
         oldPrice: 23,
-        icon: '🚉',
+        icon: brandIcon,
     },
     {
         id: 3,
@@ -25,7 +26,7 @@ const allCards = [
         period: '2024-06-01 to 2025-12-31',
         price: 23,
         oldPrice: 27,
-        icon: '🚉',
+        icon: brandIcon,
     },
     {
         id: 4,
@@ -33,7 +34,7 @@ const allCards = [
         period: '2023-11-17 to 2033-11-30',
         price: 11,
         oldPrice: 15,
-        icon: '🚉',
+        icon: brandIcon,
     },
     {
         id: 5,
@@ -41,7 +42,7 @@ const allCards = [
         period: '2024-05-01 to 2025-10-31',
         price: 15,
         oldPrice: 20,
-        icon: '🚉',
+        icon: brandIcon,
     },
     {
         id: 6,
@@ -49,7 +50,7 @@ const allCards = [
         period: '2024-07-01 to 2025-12-31',
         price: 25,
         oldPrice: 30,
-        icon: '🚉',
+        icon: brandIcon,
     },
     {
         id: 7,
@@ -57,7 +58,7 @@ const allCards = [
         period: '2024-08-01 to 2025-11-30',
         price: 30,
         oldPrice: 35,
-        icon: '🚉',
+        icon: brandIcon,
     },
     {
         id: 8,
@@ -65,7 +66,7 @@ const allCards = [
         period: '2024-09-01 to 2025-12-31',
         price: 12,
         oldPrice: 18,
-        icon: '🚉',
+        icon: brandIcon,
     },
 ]
 

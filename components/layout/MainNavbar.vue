@@ -1,6 +1,6 @@
 <script setup lang="ts">
 const navigation = [
-  { label: 'About Us', to: '/about' },
+  { label: 'About Us', to: '/aboutUs' },
   { label: 'Travel Package', to: '/travel-package' },
   { label: 'Vehicle Rental', to: '/vehicle-rental' },
   { label: 'Gallery', to: '/gallery' },
