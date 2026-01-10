@@ -11,8 +11,7 @@
                     <div class="flex justify-center">
                         <div
                             class="relative rounded-3xl overflow-hidden shadow-lg w-full h-80 bg-gradient-to-b from-gray-200 to-orange-200">
-                            <img src="/images/about/6.jpg" alt="VET Building"
-                                class="w-full h-full object-cover">
+                            <img src="/images/about/6.jpg" alt="VET Building" class="w-full h-full object-cover">
                         </div>
                     </div>
 
@@ -38,40 +37,37 @@
             <!-- Cards Grid Section -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <!-- VET Milestone Card -->
-                <AboutCard title="VET Milestone" image="/images/about/1.jpg"
+                <AboutCard title="VET Milestone" image="/images/about/1.jpg" routerLink="/aboutUs/vet-milestone"
                     description="Vireak Bustham Express Co., Ltd (VET) is a leading logistic and passenger transportation company in Cambodia that has fruitfully been developed" />
 
                 <!-- Vision and Mission Card -->
-                <AboutCard title="Vision and Mission" image="/images/about/5.jpg"
+                <AboutCard title="Vision and Mission" image="/images/about/5.jpg" routerLink="/aboutUs/mission"
                     description="Based on our firm vision to participate with the royal government for transportation sector, we committed to provide the best transportation" />
 
                 <!-- Message from Chairman & CEO Card -->
-                <AboutCard title="Message from Chairman & CEO" image="/images/about/2.jpg"
+                <AboutCard title="Message from Chairman & CEO" image="/images/about/2.jpg" routerLink="/aboutUs/ceo-message"
                     description="Vireak Buntham Express was founded on the unique vision of providing customized, innovative, end-to-end logistics and travel solutions of the" />
 
                 <!-- VET Corporation Core Values Card -->
-                <AboutCard title="VET Corporation Core Values" image="/images/about/3.jpg"
+                <AboutCard title="VET Corporation Core Values" image="/images/about/3.jpg" routerLink="/aboutUs/values"
                     description="VET's core values are the clearly stated principles about its vision, mission, and principles. That way, everyone is aligned around a guiding philosophy to serve employees, customers, and the broader community." />
 
                 <!-- VET Product and Services Card -->
-                <AboutCard title="VET Product and Services" image="/images/about/4.jpg"
+                <AboutCard title="VET Product and Services" image="/images/about/4.jpg" routerLink="/aboutUs/producte-service"
                     description="Vireak BunTham Express Co., Ltd has expanded it services every yearfrom 2004 to today and has produced many results for market demand and" />
 
                 <!-- VET Membership Card Card -->
-                <AboutCard title="VET Membership Card" image="/images/about/10.jpg"
+                <AboutCard title="VET Membership Card" image="/images/about/10.jpg" routerLink="/aboutUs/membership"
                     description="" />
 
                 <!-- Why partner with us? Card -->
-                <AboutCard title="Why partner with us?" image="/images/about/7.jpg"
-                    description="" />
+                <AboutCard title="Why partner with us?" image="/images/about/7.jpg" routerLink="/aboutUs/partner" description="" />
 
                 <!-- VET Vehicles Type Card -->
-                <AboutCard title="VET Vehicles Type" image="/images/about/8.jpg"
-                    description="" />
+                <AboutCard title="VET Vehicles Type" image="/images/about/8.jpg" routerLink="/aboutUs/vehicle-type" description="" />
 
                 <!-- VET Subsidiaries Card -->
-                <AboutCard title="VET Subsidiaries" image="/images/about/9.jpg"
-                    description="" />
+                <AboutCard title="VET Subsidiaries" image="/images/about/9.jpg" routerLink="/aboutUs/subsidiaries" description="" />
             </div>
         </div>
     </section>

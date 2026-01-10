@@ -10,8 +10,8 @@
 
                 <!-- Right Side: Content -->
                 <div class="text-white text-center lg:text-left flex flex-col justify-center">
-                    <h2 class="text-5xl lg:text-6xl font-bold mb-2">Experience</h2>
-                    <p class="text-2xl lg:text-3xl font-semibold mb-8">VET Express Mobile App</p>
+                    <h2 class="text-5xl lg:text-6xl font-bold mb-2">{{ t('experienceTitle') }}</h2>
+                    <p class="text-2xl lg:text-3xl font-semibold mb-8">{{ t('experienceSubtitle') }}</p>
 
                     <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-6 mb-8">
                         <!-- Google Play Button -->
@@ -27,7 +27,7 @@
                         </a>
 
                         <!-- Or Text -->
-                        <span class="text-xl font-semibold">Or</span>
+                        <span class="text-xl font-semibold">{{ t('experienceOr') }}</span>
 
                         <!-- QR Code -->
                         <div class="rounded-lg">
@@ -43,6 +43,7 @@
 
 <script setup lang="ts">
 // Component logic for Experience section
+const { t } = useI18n()
 </script>
 
 <style scoped>

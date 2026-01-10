@@ -1,19 +1,19 @@
 <script setup lang="ts">
-const navigation = [
-  { label: 'About Us', to: '/aboutUs' },
-  { label: 'Travel Package', to: '/travel-package' },
-  { label: 'Vehicle Rental', to: '/vehicle-rental' },
-  { label: 'Gallery', to: '/gallery' },
-  { label: 'Blog', to: '/blog' },
-  { label: 'Contact', to: '/contact' }
-]
+const { t, locale, setLocale } = useI18n()
+
+const navigation = computed(() => [
+  { label: t('about'), to: '/aboutUs' },
+  { label: t('travelPackage'), to: '/travel-package' },
+  { label: t('vehicleRental'), to: '/vehicle-rental' },
+  { label: t('gallery'), to: '/gallery' },
+  { label: t('blog'), to: '/blog' },
+  { label: t('contact'), to: '/contact' }
+])
 
 const subsidiaryDropdownOpen = ref(false)
 const languageDropdownOpen = ref(false)
 
-type LanguageKey = 'en' | 'cn'
-
-const selectedLanguage = ref<LanguageKey>('en')
+type LanguageKey = 'en' | 'cn' 
 
 const languages: Record<LanguageKey, { icon: string; label: string }> = {
   en: {
@@ -35,7 +35,7 @@ const toggleLanguage = () => {
 }
 
 const selectLanguage = (language: LanguageKey) => {
-  selectedLanguage.value = language
+  setLocale(language)
   languageDropdownOpen.value = false
 }
 </script>
@@ -44,9 +44,9 @@ const selectLanguage = (language: LanguageKey) => {
   <nav class="flex items-center justify-between w-full">
     <!-- Logo -->
     <div class="flex items-center">
-      <div class="w-8 h-8  rounded flex items-center justify-center text-white font-bold text-sm">
+      <NuxtLink to="/" class="w-8 h-8  rounded flex items-center justify-center text-white font-bold text-sm">
         <img src="@/assets/images/vireak-buntham.png" alt="Logo">
-      </div>
+      </NuxtLink>
     </div>
 
     <!-- Main Navigation -->
@@ -58,22 +58,22 @@ const selectLanguage = (language: LanguageKey) => {
       <div class="relative" @mouseenter="subsidiaryDropdownOpen = true" @mouseleave="subsidiaryDropdownOpen = false">
         <button
           class="flex items-center gap-1 text-sm font-medium text-gray-700 hover:text-orange-500 transition-colors">
-          Subsidiary
+          {{ t('subsidiary') }}
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
           </svg>
         </button>
         <div v-if="subsidiaryDropdownOpen"
           class="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg py-1 min-w-40 z-50">
-          <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Subsidiary 1</a>
-          <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Subsidiary 2</a>
+          <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">{{ t('subsidiaryOne') }}</a>
+          <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">{{ t('subsidiaryTwo') }}</a>
         </div>
       </div>
       <div class="relative">
         <button @click="toggleLanguage"
           class="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-orange-500 transition-colors">
           <!-- Selected Language Flag -->
-          <img class="w-6 h-4" :src="languages[selectedLanguage].icon" alt="">
+          <img class="w-6 h-4" :src="languages[locale as LanguageKey]?.icon || languages.en.icon" alt="">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
           </svg>
@@ -89,7 +89,7 @@ const selectLanguage = (language: LanguageKey) => {
       <!-- Sign In Button -->
       <NuxtLink to="/auth/login"
         class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
-        Sign In Account
+        {{ t('signIn') }}
       </NuxtLink>
     </div>
   </nav>

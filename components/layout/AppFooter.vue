@@ -5,6 +5,8 @@ import tiktokIcon from '@/assets/icons/footer/tiktok.svg'
 import youtubeIcon from '@/assets/icons/footer/youtube.svg'
 import paymentIcon from '@/assets/icons/footer/payment.png'
 import vet from '@/assets/images/vireak-buntham.png'
+
+const { t } = useI18n()
 const year = new Date().getFullYear()
 </script>
 
@@ -18,18 +20,18 @@ const year = new Date().getFullYear()
             <div class="w-8 h-8 flex items-center justify-center text-white font-bold">
               <img :src="vet" alt="Vireak Buntham Express"/>
             </div>
-            <h3 class="text-lg font-bold text-gray-900">Vireak Buntham Express</h3>
+            <h3 class="text-lg font-bold text-gray-900">{{ t('companyName') }}</h3>
           </div>
           
           <div class="space-y-3 text-sm text-gray-700">
             <div>
-              <span class="font-semibold">Email:</span>
+              <span class="font-semibold">{{ t('email') }}:</span>
               <a href="mailto:support@vireakbuntham.com" class="text-blue-600 hover:underline ml-2">
                 support@vireakbuntham.com
               </a>
             </div>
             <div>
-              <span class="font-semibold">Tel:</span>
+              <span class="font-semibold">{{ t('tel') }}:</span>
               <a href="tel:+85501891911" class="text-blue-600 hover:underline ml-2">
                 +855 (0)81 911 911
               </a>
@@ -41,7 +43,7 @@ const year = new Date().getFullYear()
         <div class="grid grid-cols-1 gap-8">
           <!-- Follow Us -->
           <div>
-            <h4 class="text-base font-bold text-gray-900 mb-4">Follow Us</h4>
+            <h4 class="text-base font-bold text-gray-900 mb-4">{{ t('followUs') }}</h4>
             <div class="flex gap-3">
               <a href="#" class="w-8 h-8 flex items-center justify-center transition">
                 <img :src="facebookIcon" alt="Facebook">
@@ -60,7 +62,7 @@ const year = new Date().getFullYear()
 
           <!-- We Accept -->
           <div>
-            <h4 class="text-base font-bold text-gray-900 mb-4">We Accept</h4>
+            <h4 class="text-base font-bold text-gray-900 mb-4">{{ t('weAccept') }}</h4>
             <div class="flex gap-2 flex-wrap">
               <img :src="paymentIcon" alt="KHIRC" class="h-6">
              
@@ -71,11 +73,11 @@ const year = new Date().getFullYear()
 
       <!-- Bottom Section: Copyright & Links -->
       <div class="border-t border-gray-300 pt-6 flex flex-col md:flex-row justify-between items-center text-sm text-gray-600">
-        <p>Copyright © {{ year }} vireakbuntha.com All rights reserved.</p>
+        <p>{{ t('copyright', { year }) }}</p>
         <div class="flex gap-4 mt-4 md:mt-0">
-          <a href="/terms" class="hover:text-gray-900 transition">Terms & Conditions</a>
+          <a href="/terms" class="hover:text-gray-900 transition">{{ t('terms') }}</a>
           <span>|</span>
-          <a href="/privacy" class="hover:text-gray-900 transition">Privacy Policy</a>
+          <a href="/privacy" class="hover:text-gray-900 transition">{{ t('privacy') }}</a>
         </div>
       </div>
     </div>

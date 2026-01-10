@@ -5,6 +5,8 @@ const emit = defineEmits<{
     (e: 'submit', payload: DestinationFormPayload): void
 }>()
 
+const { t, locale } = useI18n()
+
 type DestinationFormPayload = {
     origin: string
     destination: string
@@ -44,6 +46,10 @@ const returnDateObj = computed(() =>
     form.returnDate ? new Date(form.returnDate + 'T00:00:00') : null
 )
 
+const localeCode = computed(() =>
+    locale.value === 'cn' ? 'zh-CN' : locale.value === 'kh' ? 'km-KH' : 'en-US'
+)
+
 watch(
     () => form.departDate,
     value => {
@@ -66,7 +72,7 @@ watch(
 )
 
 const calendarMonthLabel = computed(() =>
-    new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(
+    new Intl.DateTimeFormat(localeCode.value, { month: 'long', year: 'numeric' }).format(
         calendarCursor.value
     )
 )
@@ -75,9 +81,9 @@ const dateHeaderLabel = computed(() =>
     (() => {
         const activeDate = activeDateField.value === 'depart' ? departDateObj.value : returnDateObj.value
         if (!activeDate) {
-            return 'Select Date'
+            return t('selectDate')
         }
-        return new Intl.DateTimeFormat('en-US', {
+        return new Intl.DateTimeFormat(localeCode.value, {
             weekday: 'short',
             month: 'short',
             day: 'numeric'
@@ -94,7 +100,7 @@ const dateYearLabel = computed(() =>
 
 const departDateDisplay = computed(() =>
     departDateObj.value
-        ? new Intl.DateTimeFormat('en-US', {
+        ? new Intl.DateTimeFormat(localeCode.value, {
             weekday: 'short',
             month: 'short',
             day: 'numeric'
@@ -104,7 +110,7 @@ const departDateDisplay = computed(() =>
 
 const returnDateDisplay = computed(() =>
     returnDateObj.value
-        ? new Intl.DateTimeFormat('en-US', {
+        ? new Intl.DateTimeFormat(localeCode.value, {
             weekday: 'short',
             month: 'short',
             day: 'numeric'
@@ -238,7 +244,7 @@ onBeforeUnmount(() => {
                                     d="M12 11c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3Zm0 0c2.21 0 4 1.79 4 4v2H8v-2c0-2.21 1.79-4 4-4Z" />
                             </svg>
                         </span>
-                        <input v-model="form.origin" type="text" placeholder="Departing From"
+                        <input v-model="form.origin" type="text" :placeholder="t('destinationFromPlaceholder')"
                             class="w-full rounded-xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm font-medium text-slate-700 shadow-sm outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-200" />
                     </div>
                 </label>
@@ -252,7 +258,7 @@ onBeforeUnmount(() => {
                                     d="M21 11.5l-9-9-9 9m18 0l-9 9-9-9" />
                             </svg>
                         </span>
-                        <input v-model="form.destination" type="text" placeholder="Going To"
+                        <input v-model="form.destination" type="text" :placeholder="t('destinationToPlaceholder')"
                             class="w-full rounded-xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm font-medium text-slate-700 shadow-sm outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-200" />
                     </div>
                 </label>
@@ -333,7 +339,7 @@ onBeforeUnmount(() => {
                                     d="M8.25 15H15m-6.75-3H12M6.75 3v2.25M17.25 3v2.25M3 9.75h18M4.5 7.5h15a1.5 1.5 0 0 1 1.5 1.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18V9a1.5 1.5 0 0 1 1.5-1.5Z" />
                             </svg>
                         </span>
-                        <input :value="returnDateDisplay" readonly placeholder="Return Date"
+                        <input :value="returnDateDisplay" readonly :placeholder="t('returnDate')"
                             class="w-full cursor-pointer rounded-xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm font-medium text-slate-700 shadow-sm outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-200"
                             @click.stop="openCalendar('return')" @focus.prevent="openCalendar('return')" />
                         <transition name="fade">
@@ -394,7 +400,7 @@ onBeforeUnmount(() => {
                 <div class="flex">
                     <button type="submit"
                         class="w-full rounded-xl bg-orange-500 py-3 text-sm font-semibold uppercase tracking-wide text-white transition hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-200 focus:ring-offset-2">
-                        Find Now
+                        {{ t('findNow') }}
                     </button>
                 </div>
             </div>

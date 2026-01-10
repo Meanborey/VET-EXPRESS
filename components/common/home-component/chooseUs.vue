@@ -3,9 +3,9 @@
     <div class="container mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Header -->
       <div class="text-center mb-16">
-        <h2 class="text-4xl font-bold text-gray-900 mb-4">Why Choose Us!</h2>
+        <h2 class="text-4xl font-bold text-gray-900 mb-4">{{ t('chooseUsTitle') }}</h2>
         <p class="text-lg text-gray-600">
-          Our schedule covers the major destinations in Cambodia and also operate to Bangkok and Ho Chi Minh City.
+          {{ t('chooseUsSubtitle') }}
         </p>
       </div>
 
@@ -19,8 +19,8 @@
             </svg>
           </div>
           <div class="flex flex-col">
-             <h3 class="text-xl font-bold text-gray-900 mb-2">Complimentary</h3>
-          <p class="text-gray-600">We offer a bottle of pure drinking water on board</p>
+             <h3 class="text-xl font-bold text-gray-900 mb-2">{{ t('featureComplimentaryTitle') }}</h3>
+           <p class="text-gray-600">{{ t('featureComplimentaryDesc') }}</p>
           </div>
          
         </div>
@@ -33,9 +33,9 @@
             </svg>
           </div>
           <div class="flex flex-col">
-          <h3 class="text-xl font-bold text-gray-900 mb-2">Liability Insurance</h3>
+          <h3 class="text-xl font-bold text-gray-900 mb-2">{{ t('featureLiabilityTitle') }}</h3>
           <p class="text-gray-600">
-            All of our fleets are covering by liability insurance both domestic and international route.
+            {{ t('featureLiabilityDesc') }}
           </p>
           </div>
         </div>
@@ -48,9 +48,9 @@
             </svg>
           </div>
           <div class="flex flex-col">
-          <h3 class="text-xl font-bold text-gray-900 mb-2">Power & USB Charger</h3>
+          <h3 class="text-xl font-bold text-gray-900 mb-2">{{ t('featurePowerTitle') }}</h3>
           <p class="text-gray-600">
-            All our fleet equip individual power outlet or USB charger to make sure your device battery is fully charged during trip.
+            {{ t('featurePowerDesc') }}
           </p>
           </div>
         </div>
@@ -63,9 +63,9 @@
             </svg>
           </div>
           <div class="flex flex-col">
-          <h3 class="text-xl font-bold text-gray-900 mb-2">Customer Service</h3>
+          <h3 class="text-xl font-bold text-gray-900 mb-2">{{ t('featureCustomerTitle') }}</h3>
           <p class="text-gray-600">
-            Our 24h call center rep are ready to answer all your question related to your trip both Khmer & English speaking.
+            {{ t('featureCustomerDesc') }}
           </p>
           </div>
         </div>
@@ -78,9 +78,9 @@
             </svg>
           </div>
           <div class="flex flex-col">
-          <h3 class="text-xl font-bold text-gray-900 mb-2">Air Conditioned</h3>
+          <h3 class="text-xl font-bold text-gray-900 mb-2">{{ t('featureAirTitle') }}</h3>
           <p class="text-gray-600">
-            Cambodia is hot country, the air-condition is always check up by our professional indoor mechanic to confirm we are not ruining your trip.
+            {{ t('featureAirDesc') }}
           </p>
           </div>
         </div>
@@ -93,9 +93,9 @@
             </svg>
           </div>
           <div class="flex flex-col">
-          <h3 class="text-xl font-bold text-gray-900 mb-2">Payment & Ticket</h3>
+          <h3 class="text-xl font-bold text-gray-900 mb-2">{{ t('featurePaymentTitle') }}</h3>
           <p class="text-gray-600">
-            You can purchase our ticket and pay real time with varieties of payment method and our e-ticket will send to your email.
+            {{ t('featurePaymentDesc') }}
           </p>
           </div>
         </div>
@@ -108,9 +108,9 @@
             </svg>
           </div>
           <div class="flex flex-col">
-          <h3 class="text-xl font-bold text-gray-900 mb-2">Comfortable Seat</h3>
+          <h3 class="text-xl font-bold text-gray-900 mb-2">{{ t('featureSeatTitle') }}</h3>
           <p class="text-gray-600">
-            Generally, van is equipping the seat up to 17 Seats but we want you to have more space we eliminated 6 seats out to have enough room and reclinable.
+            {{ t('featureSeatDesc') }}
           </p>
           </div>
         </div>
@@ -123,9 +123,9 @@
             </svg>
           </div>
           <div class="flex flex-col">
-          <h3 class="text-xl font-bold text-gray-900 mb-2">GPS Tracking System</h3>
+          <h3 class="text-xl font-bold text-gray-900 mb-2">{{ t('featureGpsTitle') }}</h3>
           <p class="text-gray-600">
-            To ensure our driver operate the bus compliance to speed limited, our full-time tracking staffs are monitoring all of our fleets.
+            {{ t('featureGpsDesc') }}
           </p>
           </div>
         </div>
@@ -138,9 +138,9 @@
             </svg>
           </div>
           <div class="flex flex-col">
-          <h3 class="text-xl font-bold text-gray-900 mb-2">Our Driver</h3>
+          <h3 class="text-xl font-bold text-gray-900 mb-2">{{ t('featureDriverTitle') }}</h3>
           <p class="text-gray-600">
-            Our driver is professionally recruited & trained by our HR team to ensure our driver is in good shape to operate the bus safely.
+            {{ t('featureDriverDesc') }}
           </p>
           </div>
         </div>
@@ -153,9 +153,9 @@
             </svg>
           </div>
           <div class="flex flex-col">
-          <h3 class="text-xl font-bold text-gray-900 mb-2">Schedule</h3>
+          <h3 class="text-xl font-bold text-gray-900 mb-2">{{ t('featureScheduleTitle') }}</h3>
           <p class="text-gray-600">
-            We are top range in Cambodia with varieties of schedule from city-to-city in Cambodia, Bangkok and Ho Chi Minh which make you convenience to plan your trip.
+            {{ t('featureScheduleDesc') }}
           </p>
           </div>
         </div>
@@ -165,7 +165,7 @@
 </template>
 
 <script setup lang="ts">
-// Component logic (if needed)
+const { t } = useI18n()
 </script>
 
 <style scoped>

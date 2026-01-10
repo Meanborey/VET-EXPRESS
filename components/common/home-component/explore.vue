@@ -3,7 +3,7 @@
     <div class="container mx-auto">
       <!-- Section Title -->
       <h2 class="text-4xl lg:text-5xl font-bold text-gray-900 mb-12 text-center">
-        Explore Trending Places
+        {{ t('exploreTitle') }}
       </h2>
 
       <!-- Destination Cards Grid -->
@@ -17,7 +17,7 @@
           >
           <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
           <div class="absolute top-4 left-4">
-            <h3 class="text-white text-3xl font-bold">Cambodia</h3>
+            <h3 class="text-white text-3xl font-bold">{{ t('countryCambodia') }}</h3>
           </div>
         </div>
 
@@ -30,7 +30,7 @@
           >
           <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
           <div class="absolute top-4 left-4">
-            <h3 class="text-white text-3xl font-bold">Laos</h3>
+            <h3 class="text-white text-3xl font-bold">{{ t('countryLaos') }}</h3>
           </div>
         </div>
 
@@ -43,7 +43,7 @@
           >
           <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
           <div class="absolute top-4 left-4">
-            <h3 class="text-white text-3xl font-bold">Thailand</h3>
+            <h3 class="text-white text-3xl font-bold">{{ t('countryThailand') }}</h3>
           </div>
         </div>
 
@@ -56,7 +56,7 @@
           >
           <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
           <div class="absolute top-4 left-4">
-            <h3 class="text-white text-3xl font-bold">Vietnam</h3>
+            <h3 class="text-white text-3xl font-bold">{{ t('countryVietnam') }}</h3>
           </div>
         </div>
       </div>
@@ -66,6 +66,7 @@
 
 <script setup lang="ts">
 // Explore component - displays trending destinations
+const { t } = useI18n()
 </script>
 
 <style scoped>

@@ -8,10 +8,10 @@
         class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 rounded-lg"
         @error="handleImageError"
       >
-       <button class="flex absolute items-end gap-2 bottom-0 right-0 rounded-br-2xl bg-orange-600  text-white hover:bg-orange-700 font-semibold transition px-4 py-2">
+       <NuxtLink :to="routerLink" class="flex absolute items-end gap-2 bottom-0 right-0 rounded-br-2xl bg-orange-600  text-white hover:bg-orange-700 font-semibold transition px-4 py-2">
        Read More
         <span class="text-sm text-end">  →</span>
-      </button>
+      </NuxtLink> 
     </div>
 
     <!-- Content Container -->
@@ -44,6 +44,7 @@ withDefaults(defineProps<{
   title: string
   image: string
   description: string
+  routerLink?: string
   badge?: string
 }>(), {
   badge: 'VET'
