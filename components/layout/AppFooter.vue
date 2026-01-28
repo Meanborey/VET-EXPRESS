@@ -11,7 +11,7 @@ const year = new Date().getFullYear()
 </script>
 
 <template>
-  <footer class="border-t border-slate-200 bg-orange-50">
+  <footer class="border-t border-slate-200 bg-orange-50" id="contact">
     <div class="mx-auto container py-12">
       <div class="flex justify-between gap-8 mb-8">
         <!-- Left Section: Company Info -->

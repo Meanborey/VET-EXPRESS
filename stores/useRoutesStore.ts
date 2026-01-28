@@ -1,38 +1,146 @@
 import { defineStore } from 'pinia';
 import type { Route, RouteApiResponse } from '~/types/route';
+import type { BaseApiResponse, ApiDestination } from '~/types/api';
 
 export const useRoutesStore = defineStore('routes', {
   state: () => ({
     localRoutes: [] as Route[],
     internationalRoutes: [] as Route[],
+    destinations: [] as ApiDestination[],
+    departureList: [] as ApiDestination[],
+    arrivalList: [] as ApiDestination[],
     loading: false,
     error: null as string | null,
+    emptyData: false,
   }),
 
   getters: {
     getAllLocalRoutes: (state) => state.localRoutes,
     getAllInternationalRoutes: (state) => state.internationalRoutes,
+    getDepartureList: (state) => state.departureList,
+    getArrivalList: (state) => state.arrivalList,
+    getDestinationList: (state) => state.arrivalList, // Alias for getArrivalList
     isLoading: (state) => state.loading,
+    isEmpty: (state) => state.emptyData,
   },
 
   actions: {
-    // Fetch routes from API (currently using dummy data)
+    // Step 4 & 5: Pinia action → API call (POST form-urlencoded + Bearer)
     async fetchRoutes() {
       this.loading = true;
       this.error = null;
 
       try {
-        // TODO: Replace with actual API call
-        // const response = await $fetch<RouteApiResponse>('/api/routes');
+        const { post } = useApi();
+        const response = await post<BaseApiResponse<RouteApiResponse>>('/routes');
         
-        // Simulate API response with dummy data
-        const response = await this.getDummyData();
-        
-        this.localRoutes = response.localRoutes;
-        this.internationalRoutes = response.internationalRoutes;
+        // Step 6: State updated → Step 7: UI reactive
+        if (response?.data?.data) {
+          this.localRoutes = response.data.data.localRoutes || [];
+          this.internationalRoutes = response.data.data.internationalRoutes || [];
+        } else {
+          // Fallback to dummy data
+          const dummyData = await this.getDummyData();
+          this.localRoutes = dummyData.localRoutes;
+          this.internationalRoutes = dummyData.internationalRoutes;
+        }
       } catch (err) {
         this.error = err instanceof Error ? err.message : 'Failed to fetch routes';
-        console.error('Error fetching routes:', err);
+        console.error('API Error, using dummy data:', err);
+        const dummyData = await this.getDummyData();
+        this.localRoutes = dummyData.localRoutes;
+        this.internationalRoutes = dummyData.internationalRoutes;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    // Fetch destinations from API
+    async fetchDestinations() {
+      this.loading = true;
+      this.error = null;
+
+      try {
+        const { post } = useApi();
+        const response = await post<BaseApiResponse<ApiDestination[]>>('/destinations');
+        
+        if (response?.data?.data) {
+          this.destinations = response.data.data;
+        }
+      } catch (err) {
+        this.error = err instanceof Error ? err.message : 'Failed to fetch destinations';
+        console.error('Error fetching destinations:', err);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    // Get departure destinations (converted from old axios function)
+    // OLD: axios POST to destination/from with searchText & type
+    async getDeparture(searchText: string = '', type?: string) {
+      this.loading = true;
+      this.error = null;
+
+      try {
+        const { post } = useApi();
+        const response = await post<BaseApiResponse<ApiDestination[]>>('/destination/from', {
+          searchText,
+          type: type || (typeof localStorage !== 'undefined' ? localStorage.getItem('types') : null)
+        });
+
+        // Step 6: State updated → Step 7: UI reactive
+        if (response?.data) {
+          const result = response.data;
+          // Check header.result and header.statusCode like old function
+          if (result.code === 200) {
+            const body = result.data;
+            if (!body || (Array.isArray(body) && body.length === 0)) {
+              this.emptyData = true;
+              this.departureList = [];
+            } else {
+              this.emptyData = false;
+              this.departureList = body;
+            }
+          }
+        }
+      } catch (err) {
+        this.error = err instanceof Error ? err.message : 'Failed to fetch departure';
+        console.error('API Error:', err);
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    // Get arrival/destination destinations (matches old getDestination function)
+    // OLD: axios POST to destination/to with fromId, searchText & type
+    async getDestination(searchText: string = '', fromId?: string | number, type?: string) {
+      this.loading = true;
+      this.error = null;
+
+      try {
+        const { post } = useApi();
+        const response = await post<BaseApiResponse<ApiDestination[]>>('/destination/to', {
+          fromId,
+          searchText,
+          type: type || (typeof localStorage !== 'undefined' ? localStorage.getItem('types') : null)
+        });
+
+        if (response?.data) {
+          const result = response.data;
+          if (result.code === 200) {
+            const body = result.data;
+            if (!body || (Array.isArray(body) && body.length === 0)) {
+              this.emptyData = true;
+              this.arrivalList = [];
+            } else {
+              this.emptyData = false;
+              this.arrivalList = body;
+            }
+          }
+        }
+      } catch (err) {
+        this.error = err instanceof Error ? err.message : 'Failed to fetch arrival';
+        console.error('API Error:', err);
       } finally {
         this.loading = false;
       }

@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import type { FlashSaleCard, FlashSaleApiResponse } from '~/types/flashSale';
+import type { BaseApiResponse } from '~/types/api';
 
 export const useFlashSaleStore = defineStore('flashSale', {
   state: () => ({
@@ -14,22 +15,27 @@ export const useFlashSaleStore = defineStore('flashSale', {
   },
 
   actions: {
-    // Fetch flash sales from API (currently using dummy data)
+    // Step 4 & 5: Pinia action → API call (POST form-urlencoded + Bearer)
     async fetchFlashSales() {
       this.loading = true;
       this.error = null;
 
       try {
-        // TODO: Replace with actual API call
-        // const response = await $fetch<FlashSaleApiResponse>('/api/flash-sales');
+        const { post } = useApi();
+        const response = await post<BaseApiResponse<FlashSaleCard[]>>('/flash-sales');
         
-        // Simulate API response with dummy data
-        const response = await this.getDummyData();
-        
-        this.flashSales = response.flashSales;
+        // Step 6: State updated → Step 7: UI reactive
+        if (response?.data?.data) {
+          this.flashSales = response.data.data;
+        } else {
+          const dummyData = await this.getDummyData();
+          this.flashSales = dummyData.flashSales;
+        }
       } catch (err) {
         this.error = err instanceof Error ? err.message : 'Failed to fetch flash sales';
-        console.error('Error fetching flash sales:', err);
+        console.error('API Error, using dummy data:', err);
+        const dummyData = await this.getDummyData();
+        this.flashSales = dummyData.flashSales;
       } finally {
         this.loading = false;
       }

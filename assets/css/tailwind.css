@@ -8,3 +8,11 @@
   margin: 0 auto;
   
 }
+@media (min-width: 1550px) and (max-width: 2649px) {
+    .container {
+        /* max-width: 1540px; */
+        max-width: 65%;
+        width: 100%;
+        margin: 0 auto;
+    }
+}

@@ -6,8 +6,8 @@ const navigation = computed(() => [
   { label: t('travelPackage'), to: '/travel-package' },
   { label: t('vehicleRental'), to: '/vehicle-rental' },
   { label: t('gallery'), to: '/gallery' },
-  { label: t('blog'), to: '/blog' },
-  { label: t('contact'), to: '/contact' }
+  { label: t('blog'), to: '/blogs' },
+  { label: t('contact'), action: 'scroll' }
 ])
 
 const subsidiaryDropdownOpen = ref(false)
@@ -38,6 +38,13 @@ const selectLanguage = (language: LanguageKey) => {
   setLocale(language)
   languageDropdownOpen.value = false
 }
+
+const scrollToContact = () => {
+  const element = document.getElementById('contact')
+  if (element) {
+    element.scrollIntoView({ behavior: 'smooth' })
+  }
+}
 </script>
 
 <template>
@@ -51,9 +58,14 @@ const selectLanguage = (language: LanguageKey) => {
 
     <!-- Main Navigation -->
     <div class="flex items-center gap-8 text-sm font-medium text-gray-700">
-      <NuxtLink v-for="item in navigation" :key="item.to" :to="item.to" class="hover:text-orange-500 transition-colors">
-        {{ item.label }}
-      </NuxtLink>
+      <template v-for="item in navigation" :key="item.label">
+        <NuxtLink v-if="!item.action" :to="item.to" class="hover:text-orange-500 transition-colors">
+          {{ item.label }}
+        </NuxtLink>
+        <button v-else @click="scrollToContact" class="hover:text-orange-500 transition-colors cursor-pointer">
+          {{ item.label }}
+        </button>
+      </template>
       <!-- Subsidiary Dropdown -->
       <div class="relative" @mouseenter="subsidiaryDropdownOpen = true" @mouseleave="subsidiaryDropdownOpen = false">
         <button

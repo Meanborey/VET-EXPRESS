@@ -1,11 +1,15 @@
 <script setup lang="ts">
+import { root } from 'postcss';
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
+import Router from '../common/home-component/router.vue';
+import { useDestinationStore } from '~/stores/useDestinationStore'
 
 const emit = defineEmits<{
     (e: 'submit', payload: DestinationFormPayload): void
 }>()
 
 const { t, locale } = useI18n()
+const destinationStore = useDestinationStore()
 
 type DestinationFormPayload = {
     origin: string
@@ -38,6 +42,131 @@ const calendarContainerRef = ref<HTMLElement | null>(null)
 const calendarPanelRef = ref<HTMLElement | null>(null)
 const activeDateField = ref<DateField>('depart')
 
+// Location selector
+const isOriginDropdownOpen = ref(false)
+const isDestinationDropdownOpen = ref(false)
+const originInputRef = ref<HTMLElement | null>(null)
+const destinationInputRef = ref<HTMLElement | null>(null)
+const selectedOriginId = ref<string>('')
+const selectedDestinationId = ref<string>('')
+
+// Get unique locations from destination store (API-based)
+const availableOrigins = computed(() => {
+  return destinationStore.origins
+})
+
+const availableDestinations = computed(() => {
+  return destinationStore.destinations
+})
+
+const filteredOrigins = computed(() => {
+  if (!form.origin) return availableOrigins.value
+  return availableOrigins.value.filter(origin => 
+    origin.name.toLowerCase().includes(form.origin.toLowerCase())
+  )
+})
+
+const filteredDestinations = computed(() => {
+  if (!form.destination) return availableDestinations.value
+  return availableDestinations.value.filter(dest => 
+    dest.name.toLowerCase().includes(form.destination.toLowerCase())
+  )
+})
+
+// Debounce timer for search
+let originSearchTimeout: ReturnType<typeof setTimeout> | null = null
+let destinationSearchTimeout: ReturnType<typeof setTimeout> | null = null
+
+const selectOrigin = (origin: { id: string; name: string }) => {
+  form.origin = origin.name
+  selectedOriginId.value = origin.id
+  isOriginDropdownOpen.value = false
+  
+  // Fetch destinations based on selected origin
+  destinationStore.fetchDestinations('', origin.id)
+  
+  // Auto-open destination dropdown after selecting origin
+  setTimeout(() => {
+    isDestinationDropdownOpen.value = true
+  }, 100)
+}
+
+const selectDestination = (destination: { id: string; name: string }) => {
+  form.destination = destination.name
+  selectedDestinationId.value = destination.id
+  isDestinationDropdownOpen.value = false
+}
+
+// Handle origin input change with debounce
+const handleOriginInput = () => {
+  isOriginDropdownOpen.value = true
+  
+  if (originSearchTimeout) {
+    clearTimeout(originSearchTimeout)
+  }
+  
+  originSearchTimeout = setTimeout(() => {
+    destinationStore.fetchOrigins(form.origin)
+  }, 300)
+}
+
+// Handle destination input change with debounce
+const handleDestinationInput = () => {
+  isDestinationDropdownOpen.value = true
+  
+  if (destinationSearchTimeout) {
+    clearTimeout(destinationSearchTimeout)
+  }
+  
+  destinationSearchTimeout = setTimeout(() => {
+    destinationStore.fetchDestinations(form.destination, selectedOriginId.value)
+  }, 300)
+}
+
+// Handle origin focus - fetch origins if empty
+const handleOriginFocus = () => {
+  isOriginDropdownOpen.value = true
+  if (availableOrigins.value.length === 0) {
+    destinationStore.fetchOrigins('')
+  }
+}
+
+// Handle destination focus - fetch destinations if empty
+const handleDestinationFocus = () => {
+  isDestinationDropdownOpen.value = true
+  if (availableDestinations.value.length === 0) {
+    destinationStore.fetchDestinations('', selectedOriginId.value)
+  }
+}
+
+// Watch for origin changes to auto-open destination dropdown
+watch(
+    () => form.origin,
+    (newValue, oldValue) => {
+        // Only auto-open if origin was just filled and destination is empty
+        if (newValue && !oldValue && !form.destination) {
+            setTimeout(() => {
+                isDestinationDropdownOpen.value = true
+            }, 100)
+        }
+        // Clear selected origin ID if input is cleared
+        if (!newValue) {
+            selectedOriginId.value = ''
+        }
+    }
+)
+
+// Watch for destination changes
+watch(
+    () => form.destination,
+    (newValue) => {
+        // Clear selected destination ID if input is cleared
+        if (!newValue) {
+            selectedDestinationId.value = ''
+        }
+    }
+)
+
 const departDateObj = computed(() =>
     form.departDate ? new Date(form.departDate + 'T00:00:00') : null
 )
@@ -47,7 +176,7 @@ const returnDateObj = computed(() =>
 )
 
 const localeCode = computed(() =>
-    locale.value === 'cn' ? 'zh-CN' : locale.value === 'kh' ? 'km-KH' : 'en-US'
+    locale.value === 'cn' ? 'zh-CN' : 'en-US'
 )
 
 watch(
@@ -100,21 +229,13 @@ const dateYearLabel = computed(() =>
 
 const departDateDisplay = computed(() =>
     departDateObj.value
-        ? new Intl.DateTimeFormat(localeCode.value, {
-            weekday: 'short',
-            month: 'short',
-            day: 'numeric'
-        }).format(departDateObj.value)
+        ? toInputDate(departDateObj.value)
         : ''
 )
 
 const returnDateDisplay = computed(() =>
     returnDateObj.value
-        ? new Intl.DateTimeFormat(localeCode.value, {
-            weekday: 'short',
-            month: 'short',
-            day: 'numeric'
-        }).format(returnDateObj.value)
+        ? toInputDate(returnDateObj.value)
         : ''
 )
 
@@ -183,8 +304,32 @@ const selectCalendarDay = (date: Date) => {
     isCalendarOpen.value = false
 }
 
-const onSubmit = () => {
+const onSubmit = async () => {
+    // Set search parameters in store with IDs for API calls
+    destinationStore.setSearchParams({
+        origin: form.origin,
+        originId: selectedOriginId.value,
+        destination: form.destination,
+        destinationId: selectedDestinationId.value,
+        departDate: form.departDate,
+        returnDate: form.returnDate
+    })
+
+    // Emit for parent component
     emit('submit', { ...form })
+    
+    // Navigate to schedulelist page
+    await navigateTo({
+        path: '/schedulelist',
+        query: {
+            from: form.origin,
+            fromId: selectedOriginId.value || undefined,
+            to: form.destination,
+            toId: selectedDestinationId.value || undefined,
+            departDate: form.departDate,
+            returnDate: form.returnDate || undefined
+        }
+    })
 }
 
 const openCalendar = (field: DateField) => {
@@ -204,6 +349,8 @@ const openCalendar = (field: DateField) => {
 
 const handleDocumentClick = (event: MouseEvent) => {
     const target = event.target as Node
+    
+    // Close calendar
     if (
         calendarPanelRef.value &&
         calendarPanelRef.value.contains(target)
@@ -217,14 +364,31 @@ const handleDocumentClick = (event: MouseEvent) => {
         return
     }
     isCalendarOpen.value = false
+    
+    // Close location dropdowns
+    if (originInputRef.value && !originInputRef.value.contains(target)) {
+        isOriginDropdownOpen.value = false
+    }
+    if (destinationInputRef.value && !destinationInputRef.value.contains(target)) {
+        isDestinationDropdownOpen.value = false
+    }
 }
 
 onMounted(() => {
     document.addEventListener('click', handleDocumentClick)
+    // Fetch initial origins on mount
+    destinationStore.fetchOrigins('')
 })
 
 onBeforeUnmount(() => {
     document.removeEventListener('click', handleDocumentClick)
+    // Clear debounce timers
+    if (originSearchTimeout) {
+        clearTimeout(originSearchTimeout)
+    }
+    if (destinationSearchTimeout) {
+        clearTimeout(destinationSearchTimeout)
+    }
 })
 </script>
 
@@ -236,7 +400,7 @@ onBeforeUnmount(() => {
             <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-[repeat(7,minmax(0,1fr))]">
                 <!-- Departing From -->
                 <label class="flex flex-col gap-1 col-span-2">
-                    <div class="relative">
+                    <div ref="originInputRef" class="relative">
                         <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
                                 stroke="currentColor" stroke-width="1.5" class="h-5 w-5">
@@ -244,13 +408,45 @@ onBeforeUnmount(() => {
                                     d="M12 11c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3Zm0 0c2.21 0 4 1.79 4 4v2H8v-2c0-2.21 1.79-4 4-4Z" />
                             </svg>
                         </span>
-                        <input v-model="form.origin" type="text" :placeholder="t('destinationFromPlaceholder')"
+                        <input 
+                            v-model="form.origin" 
+                            type="text" 
+                            :placeholder="t('destinationFromPlaceholder')"
+                            @focus="handleOriginFocus"
+                            @input="handleOriginInput"
                             class="w-full rounded-xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm font-medium text-slate-700 shadow-sm outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-200" />
+                        
+                        <!-- Loading indicator -->
+                        <span v-if="destinationStore.loading && isOriginDropdownOpen" 
+                            class="absolute inset-y-0 right-3 flex items-center text-orange-400">
+                            <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </span>
+                        
+                        <!-- Origin Dropdown -->
+                        <transition name="fade">
+                            <div v-if="isOriginDropdownOpen && filteredOrigins.length > 0"
+                                class="absolute left-0 top-[calc(100%+0.5rem)] z-30 w-full rounded-xl bg-white shadow-xl border border-slate-200 max-h-60 overflow-y-auto">
+                                <button
+                                    v-for="origin in filteredOrigins"
+                                    :key="origin.id"
+                                    type="button"
+                                    @click="selectOrigin(origin)"
+                                    class="w-full px-4 py-3 text-left text-sm hover:bg-orange-50 transition-colors border-b border-slate-100 last:border-b-0 flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 text-orange-500">
+                                        <path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clip-rule="evenodd" />
+                                    </svg>
+                                    <span class="font-medium text-slate-700">{{ origin.name }}</span>
+                                </button>
+                            </div>
+                        </transition>
                     </div>
                 </label>
                 <!-- Going To -->
                 <label class="flex flex-col col-span-2 gap-1">
-                    <div class="relative">
+                    <div ref="destinationInputRef" class="relative">
                         <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
                                 stroke="currentColor" stroke-width="1.5" class="h-5 w-5">
@@ -258,8 +454,40 @@ onBeforeUnmount(() => {
                                     d="M21 11.5l-9-9-9 9m18 0l-9 9-9-9" />
                             </svg>
                         </span>
-                        <input v-model="form.destination" type="text" :placeholder="t('destinationToPlaceholder')"
+                        <input 
+                            v-model="form.destination" 
+                            type="text" 
+                            :placeholder="t('destinationToPlaceholder')"
+                            @focus="handleDestinationFocus"
+                            @input="handleDestinationInput"
                             class="w-full rounded-xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm font-medium text-slate-700 shadow-sm outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-200" />
+                        
+                        <!-- Loading indicator -->
+                        <span v-if="destinationStore.loading && isDestinationDropdownOpen" 
+                            class="absolute inset-y-0 right-3 flex items-center text-orange-400">
+                            <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </span>
+                        
+                        <!-- Destination Dropdown -->
+                        <transition name="fade">
+                            <div v-if="isDestinationDropdownOpen && filteredDestinations.length > 0"
+                                class="absolute left-0 top-[calc(100%+0.5rem)] z-30 w-full rounded-xl bg-white shadow-xl border border-slate-200 max-h-60 overflow-y-auto">
+                                <button
+                                    v-for="destination in filteredDestinations"
+                                    :key="destination.id"
+                                    type="button"
+                                    @click="selectDestination(destination)"
+                                    class="w-full px-4 py-3 text-left text-sm hover:bg-orange-50 transition-colors border-b border-slate-100 last:border-b-0 flex items-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 text-orange-500">
+                                        <path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clip-rule="evenodd" />
+                                    </svg>
+                                    <span class="font-medium text-slate-700">{{ destination.name }}</span>
+                                </button>
+                            </div>
+                        </transition>
                     </div>
                 </label>
                 <!-- Departing Date -->
@@ -398,7 +626,7 @@ onBeforeUnmount(() => {
                 </label>
 
                 <div class="flex">
-                    <button type="submit"
+                    <button type="submit" 
                         class="w-full rounded-xl bg-orange-500 py-3 text-sm font-semibold uppercase tracking-wide text-white transition hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-200 focus:ring-offset-2">
                         {{ t('findNow') }}
                     </button>
