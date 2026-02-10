@@ -215,7 +215,7 @@ const handleSubmit = () => {
     console.log('Total bookings in store:', bookingStore.bookings.length)
     
     // Show success message
-    alert(`Booking successful! Booking ID: ${newBooking.id}`)
+    // alert(`Booking successful! Booking ID: ${newBooking.id}`)
     
     // Reset form
     resetForm()

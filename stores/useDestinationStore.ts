@@ -21,11 +21,12 @@ export interface Destination {
 
 export interface SearchParams {
     origin: string
-    originId: string
+    destinationFrom: string  // Changed from originId
     destination: string
-    destinationId: string
+    destinationTo: string    // Changed from destinationId
     departDate: string
     returnDate: string
+    nationally: string       // Added for API
     type: string
 }
 
@@ -41,11 +42,12 @@ export const useDestinationStore = defineStore('destination', {
         // Search parameters
         searchParams: {
             origin: '',
-            originId: '',
+            destinationFrom: '',
             destination: '',
-            destinationId: '',
+            destinationTo: '',
             departDate: '',
             returnDate: '',
+            nationally: 'local',
             type: ''
         } as SearchParams
     }),
@@ -102,9 +104,10 @@ export const useDestinationStore = defineStore('destination', {
             this.searchParams = { ...this.searchParams, ...params }
             // Store IDs in localStorage for API calls
             if (typeof localStorage !== 'undefined') {
-                if (params.originId) localStorage.setItem('departureFromId', params.originId)
-                if (params.destinationId) localStorage.setItem('destinationToId', params.destinationId)
+                if (params.destinationFrom) localStorage.setItem('departureFromId', params.destinationFrom)
+                if (params.destinationTo) localStorage.setItem('destinationToId', params.destinationTo)
                 if (params.type) localStorage.setItem('types', params.type)
+                if (params.nationally) localStorage.setItem('nationally', params.nationally)
             }
         },
 

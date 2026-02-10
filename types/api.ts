@@ -12,23 +12,54 @@ export interface BaseApiResponse<T = unknown> {
 
 // Schedule types
 export interface ApiSchedule {
-  id: string | number
-  vehicleName: string
-  vehicleType: string
-  departureTime: string
-  arrivalTime: string
-  duration?: string
-  availableSeats: number
-  totalSeats: number
-  originalPrice: number
+  id: string
+  transportationType: string
+  transportationPhoto?: string
+  type: number
+  vehicleType: number
+  departure: string
+  arrival: string
+  duration: string
+  seatAvailable: number
+  totalSeat: number
+  priceOriginal: number
+  priceForeigner?: number
   price: number
   origin: string
   destination: string
   departDate: string
-  boardingPoint?: string
-  dropOffPoint?: string
+  routeInfo?: string
+  description?: string
+  note?: string
+  boardingPoint: string
+  boardingPointAddress?: string
+  boardingPointId?: string
+  boardingPointLats?: string
+  boardingPointLongs?: string
+  boardingPointList?: any[]
+  boardingPointLists?: any[]
+  dropOffPoint: string
+  dropOffPointAddress?: string
+  dropOffPointId?: string
+  dropOffPointLats?: string
+  dropOffPointLongs?: string
+  dropOffPointLists?: any[]
   seatLayout?: string
-  unavailableSeats?: string[]
+  unavailableSeats?: Array<string | { seatNumber: string; gender?: string; status?: number }>
+  nationRoad?: string
+  scheduleType?: number
+  slidePhoto?: any[]
+  snack?: number
+  status?: number
+  steward?: number
+  discount?: number
+  disPercent?: string
+  airCon?: number
+  allowPricePeriod?: number
+  amenities?: any[]
+  wct?: number
+  wifi?: number
+  transportRouteDisplay?: string
 }
 
 // Destination types

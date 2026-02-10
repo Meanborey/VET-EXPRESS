@@ -308,9 +308,9 @@ const onSubmit = async () => {
     // Set search parameters in store with IDs for API calls
     destinationStore.setSearchParams({
         origin: form.origin,
-        originId: selectedOriginId.value,
+        destinationFrom: selectedOriginId.value,
         destination: form.destination,
-        destinationId: selectedDestinationId.value,
+        destinationTo: selectedDestinationId.value,
         departDate: form.departDate,
         returnDate: form.returnDate
     })
@@ -393,8 +393,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-    <div
-        class="absolute bottom-[30%] left-1/2 z-10 flex w-full container -translate-x-1/2 flex-col gap-6 lg:flex-row">
+    <div class=" flex-col gap-6 lg:flex-row">
         <form ref="calendarContainerRef" class="w-full rounded-lg bg-white/95 p-4 shadow-xl backdrop-blur"
             @submit.prevent="onSubmit">
             <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-[repeat(7,minmax(0,1fr))]">

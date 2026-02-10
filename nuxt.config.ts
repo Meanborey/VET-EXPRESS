@@ -8,8 +8,8 @@ export default defineNuxtConfig({
   // Step 2: runtimeConfig - reads from .env
   runtimeConfig: {
     public: {
-      apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL || 'https://qacltom.udaya-tech.com/vetTkWBusApi',
-      apiToken: process.env.NUXT_PUBLIC_API_TOKEN || 'ade765b5-0644-47df-90fb-fc91b89b3dba'
+      apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL ,
+      apiToken: process.env.NUXT_PUBLIC_API_TOKEN
     }
   },
 

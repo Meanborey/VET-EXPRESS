@@ -20,39 +20,8 @@ export const useBookingStore = defineStore('booking', {
                 status: 'confirmed',
                 createdAt: '2026-01-20T10:30:00Z',
                 totalPrice: 180
-            },
-            {
-                id: 'BK002',
-                fullName: 'Sarah Johnson',
-                phoneNumber: '+855 98 765 432',
-                journeyType: 'one-way',
-                departure: 'siem-reap',
-                arrival: 'sihanoukville',
-                departureDate: '2026-02-20',
-                amountOfCar: 2,
-                remark: 'Pickup from hotel at 8 AM',
-                vehicleId: 'luxury-van-hiace',
-                vehicleName: 'Luxury Van Hiace',
-                status: 'pending',
-                createdAt: '2026-01-21T14:20:00Z',
-                totalPrice: 300
-            },
-            {
-                id: 'BK003',
-                fullName: 'Michael Chen',
-                phoneNumber: '+855 77 888 999',
-                journeyType: 'trip',
-                departure: 'phnom-penh',
-                arrival: 'battambang',
-                departureDate: '2026-03-01',
-                amountOfCar: 1,
-                remark: 'Full day tour with stops at temples',
-                vehicleId: 'luxury-coaster',
-                vehicleName: 'Luxury Coaster',
-                status: 'confirmed',
-                createdAt: '2026-01-22T09:15:00Z',
-                totalPrice: 250
             }
+           
         ],
         currentBooking: null,
         destinations: [
