@@ -241,6 +241,7 @@ const returnDateDisplay = computed(() =>
 
 const buildCalendar = (anchor: Date) => {
     const firstOfMonth = new Date(anchor.getFullYear(), anchor.getMonth(), 1)
+    const lastOfMonth = new Date(anchor.getFullYear(), anchor.getMonth() + 1, 0)
     const startOffset = firstOfMonth.getDay()
     const firstVisible = new Date(firstOfMonth)
     firstVisible.setDate(firstOfMonth.getDate() - startOffset)
@@ -248,16 +249,25 @@ const buildCalendar = (anchor: Date) => {
     const weeks: Array<Array<{ date: Date; inCurrentMonth: boolean }>> = []
     const cursor = new Date(firstVisible)
 
-    for (let weekIndex = 0; weekIndex < 6; weekIndex += 1) {
+    while (cursor <= lastOfMonth || weeks.length === 0) {
         const week: Array<{ date: Date; inCurrentMonth: boolean }> = []
+        let hasCurrentMonthDay = false
         for (let dayIndex = 0; dayIndex < 7; dayIndex += 1) {
+            const inCurrentMonth = cursor.getMonth() === anchor.getMonth()
+            if (inCurrentMonth) {
+                hasCurrentMonthDay = true
+            }
             week.push({
                 date: new Date(cursor),
-                inCurrentMonth: cursor.getMonth() === anchor.getMonth()
+                inCurrentMonth
             })
             cursor.setDate(cursor.getDate() + 1)
         }
-        weeks.push(week)
+        if (hasCurrentMonthDay) {
+            weeks.push(week)
+        } else {
+            break
+        }
     }
 
     return weeks
@@ -265,14 +275,26 @@ const buildCalendar = (anchor: Date) => {
 
 const calendarWeeks = computed(() => buildCalendar(calendarCursor.value))
 
+const startOfDay = (date: Date) => new Date(date.getFullYear(), date.getMonth(), date.getDate())
+
 const isSelectedDate = (date: Date) => {
     const compareValue = activeDateField.value === 'depart' ? form.departDate : form.returnDate
     return compareValue === toInputDate(date)
 }
 
 const isToday = (date: Date) => {
-    const today = new Date()
-    return date.toDateString() === today.toDateString()
+    return startOfDay(date).getTime() === startOfDay(new Date()).getTime()
+}
+
+const isPastDate = (date: Date) => {
+    return startOfDay(date).getTime() < startOfDay(new Date()).getTime()
+}
+
+const isBeforeDepartDate = (date: Date) => {
+    if (!form.departDate) {
+        return false
+    }
+    return startOfDay(date).getTime() < startOfDay(new Date(form.departDate + 'T00:00:00')).getTime()
 }
 
 const goToPreviousMonth = () => {
@@ -537,18 +559,25 @@ onBeforeUnmount(() => {
                                     </div>
                                     <div class="mt-2 grid grid-cols-7 gap-1 text-sm">
                                         <template v-for="(week, weekIndex) in calendarWeeks" :key="`week-${weekIndex}`">
-                                            <button v-for="day in week" :key="day.date.toISOString()" type="button"
-                                                class="flex h-10 w-full items-center justify-center rounded-lg transition"
-                                                :class="[
-                                                    day.inCurrentMonth ? 'text-slate-700' : 'text-slate-300',
-                                                    isSelectedDate(day.date)
-                                                        ? 'bg-orange-500 text-white shadow'
-                                                        : isToday(day.date)
-                                                        ? 'bg-blue-100 text-blue-600 font-semibold'
-                                                        : 'hover:bg-orange-100 hover:text-orange-600'
-                                                ]" @click.stop="selectCalendarDay(day.date)">
-                                                {{ day.date.getDate() }}
-                                            </button>
+                                            <template v-for="day in week" :key="day.date.toISOString()">
+                                                <button v-if="day.inCurrentMonth" type="button"
+                                                    :disabled="isPastDate(day.date)"
+                                                    class="flex h-10 w-full items-center justify-center rounded-lg transition disabled:cursor-not-allowed disabled:text-slate-300"
+                                                    :class="[
+                                                        'text-slate-700',
+                                                        isPastDate(day.date)
+                                                            ? 'text-slate-300'
+                                                            : isSelectedDate(day.date)
+                                                            ? 'bg-orange-500 text-white shadow'
+                                                            : isToday(day.date)
+                                                            ? 'bg-blue-100 text-blue-600 font-semibold'
+                                                            : 'hover:bg-orange-100 hover:text-orange-600'
+                                                    ]"
+                                                    @click.stop="!isPastDate(day.date) && selectCalendarDay(day.date)">
+                                                    {{ day.date.getDate() }}
+                                                </button>
+                                                <span v-else class="h-10 w-full"></span>
+                                            </template>
                                         </template>
                                     </div>
                                 </div>
@@ -556,7 +585,7 @@ onBeforeUnmount(() => {
                         </transition>
                     </div>
                 </label>
-                
+                <!-- Returning Date -->
                 <label class="flex flex-col gap-1">
                     <div class="relative" @click.stop="openCalendar('return')">
                         <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400">
@@ -604,18 +633,25 @@ onBeforeUnmount(() => {
                                     </div>
                                     <div class="mt-2 grid grid-cols-7 gap-1 text-sm">
                                         <template v-for="(week, weekIndex) in calendarWeeks" :key="`week-${weekIndex}`">
-                                            <button v-for="day in week" :key="day.date.toISOString()" type="button"
-                                                class="flex h-10 w-full items-center justify-center rounded-lg transition"
-                                                :class="[
-                                                    day.inCurrentMonth ? 'text-slate-700' : 'text-slate-300',
-                                                    isSelectedDate(day.date)
-                                                        ? 'bg-orange-500 text-white shadow'
-                                                        : isToday(day.date)
-                                                        ? 'bg-blue-100 text-blue-600 font-semibold'
-                                                        : 'hover:bg-orange-100 hover:text-orange-600'
-                                                ]" @click.stop="selectCalendarDay(day.date)">
-                                                {{ day.date.getDate() }}
-                                            </button>
+                                            <template v-for="day in week" :key="day.date.toISOString()">
+                                                <button v-if="day.inCurrentMonth" type="button"
+                                                    :disabled="isPastDate(day.date) || isBeforeDepartDate(day.date)"
+                                                    class="flex h-10 w-full items-center justify-center rounded-lg transition disabled:cursor-not-allowed disabled:text-slate-300"
+                                                    :class="[
+                                                        'text-slate-700',
+                                                        isPastDate(day.date) || isBeforeDepartDate(day.date)
+                                                            ? 'text-slate-300'
+                                                            : isSelectedDate(day.date)
+                                                            ? 'bg-orange-500 text-white shadow'
+                                                            : isToday(day.date)
+                                                            ? 'bg-blue-100 text-blue-600 font-semibold'
+                                                            : 'hover:bg-orange-100 hover:text-orange-600'
+                                                    ]"
+                                                    @click.stop="!(isPastDate(day.date) || isBeforeDepartDate(day.date)) && selectCalendarDay(day.date)">
+                                                    {{ day.date.getDate() }}
+                                                </button>
+                                                <span v-else class="h-10 w-full"></span>
+                                            </template>
                                         </template>
                                     </div>
                                 </div>

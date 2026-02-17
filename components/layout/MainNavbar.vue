@@ -45,14 +45,27 @@ const scrollToContact = () => {
     element.scrollIntoView({ behavior: 'smooth' })
   }
 }
+
+// Image error handling
+const onImageError = (event: Event) => {
+  const img = event.target as HTMLImageElement
+  if (img) {
+    img.style.display = 'none'
+    console.warn(`Failed to load image: ${img.src}`)
+  }
+}
 </script>
 
 <template>
   <nav class="flex items-center justify-between w-full">
     <!-- Logo -->
     <div class="flex items-center">
-      <NuxtLink to="/" class="w-8 h-8  rounded flex items-center justify-center text-white font-bold text-sm">
-        <img src="@/assets/images/vireak-buntham.png" alt="Logo">
+      <NuxtLink to="/" class="w-8 h-8 rounded flex items-center justify-center text-white font-bold text-sm">
+        <img 
+          src="/images/vireak-buntham.png" 
+          alt="VET Express Logo" 
+          class="w-8 h-8 object-contain"
+          @error="onImageError">
       </NuxtLink>
     </div>
 
@@ -85,7 +98,11 @@ const scrollToContact = () => {
         <button @click="toggleLanguage"
           class="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-orange-500 transition-colors">
           <!-- Selected Language Flag -->
-          <img class="w-6 h-4" :src="languages[locale as LanguageKey]?.icon || languages.en.icon" alt="">
+          <img 
+            class="w-6 h-4 object-cover" 
+            :src="languages[locale as LanguageKey]?.icon || languages.en.icon" 
+            :alt="`${languages[locale as LanguageKey]?.label || languages.en.label} flag`"
+            @error="onImageError">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
           </svg>
@@ -93,7 +110,11 @@ const scrollToContact = () => {
         <div v-if="languageDropdownOpen" 
           class="absolute top-full right-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg py-1 min-w-36 z-50">
           <div v-for="(lang, key) in languages" :key="key" @click="selectLanguage(key as LanguageKey)" class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer">
-            <img class="w-6 h-4" :src="lang.icon" alt="icon language">
+            <img 
+              class="w-6 h-4 object-cover" 
+              :src="lang.icon" 
+              :alt="`${lang.label} flag`"
+              @error="onImageError">
             <span>{{ lang.label }}</span>
           </div>
         </div>

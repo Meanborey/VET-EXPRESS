@@ -100,6 +100,23 @@ export interface ApiVehicle {
   pricePerDay?: number
 }
 
+// Boarding point types
+export interface ApiBoardingPoint {
+  id?: string | number
+  name?: string
+  title?: string
+  location?: string
+  time?: string
+  departTime?: string
+  departureTime?: string
+  boardingTime?: string
+  address?: string
+  lats?: string
+  longs?: string
+  latitude?: string
+  longitude?: string
+}
+
 // Flash Sale types
 export interface ApiFlashSale {
   id: string | number

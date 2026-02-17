@@ -101,47 +101,45 @@
               <h3 class="text-lg font-bold text-gray-800 mb-4">Booking Summary</h3>
 
               <div class="space-y-3 mb-6">
-                <div class="flex justify-between text-sm">
-                  <span class="text-gray-600">Vehicle Type:</span>
-                  <span class="font-semibold text-gray-800">{{ scheduleInfo.vehicleType }}</span>
+                <div class="flex  text-sm w-full ">
+                  <span class="text-gray-600 w-1/2">Vehicle Type</span>
+                  <span class="font-semibold text-gray-800">: {{ scheduleInfo.vehicleType }}</span>
                 </div>
-                <div class="flex justify-between text-sm">
-                  <span class="text-gray-600">Departure:</span>
-                  <span class="font-semibold text-gray-800">{{ scheduleInfo.departure }}</span>
+                <div class="flex  text-sm w-full ">
+                  <span class="text-gray-600 w-1/2">Departure</span>
+                  <span class="font-semibold text-gray-800">: {{ scheduleInfo.departure }}</span>
                 </div>
-                <div class="flex justify-between text-sm">
-                  <span class="text-gray-600">Price:</span>
-                  <span class="font-semibold text-gray-800">${{ scheduleInfo.price }}</span>
+                <div class="flex  text-sm w-full ">
+                  <span class="text-gray-600 w-1/2">Price</span>
+                  <span class="font-semibold text-gray-800">: ${{ scheduleInfo.price }}</span>
                 </div>
-                <div class="flex justify-between text-sm">
-                  <span class="text-gray-600">Selected Seat:</span>
-                  <span class="font-semibold text-orange-600">{{ selectedSeats.length }}</span>
+                <div class="flex  text-sm w-full ">
+                  <span class="text-gray-600 w-1/2">Selected Seat</span>
+                  <span class="font-semibold"> : {{ selectedSeats.length }}</span>
                 </div>
-                <div v-if="selectedSeats.length > 0" class="pt-2 border-t border-gray-300">
-                  <span class="text-xs text-gray-600">Seat Number:</span>
-                  <div class="flex flex-wrap gap-2 mt-2">
-                    <span v-for="seat in selectedSeats" :key="seat.value"
-                      class="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded">
-                      {{ seat.label }}
-                    </span>
-                  </div>
+                <div class="pt-2 border-t border-gray-300 flex w-full">
+                  <span class="text-xs text-gray-600 w-1/2">Seat Number</span>
+                  <span class="text-xs font-semibold text-gray-800 w-1/2">: {{ selectedSeatLabels }}</span>
                 </div>
               </div>
 
               <!-- Total Fare -->
-              <div class="bg-white rounded-lg p-4 mb-4 border border-gray-300">
-                <div class="flex justify-between items-center">
-                  <span class="text-gray-600 font-medium">Total fare:</span>
-                  <span class="text-2xl font-bold text-gray-800">${{ totalFare.toFixed(2) }}</span>
+              <div class=" mb-4  ">
+                <div class="flex items-center w-full">
+                  <span class="text-gray-600 font-semibold w-1/2">Total </span>
+                  <span class="text-lg font-semibold text-gray-800 w-1/2">: ${{ totalFare.toFixed(2) }}</span>
                 </div>
               </div>
 
               <!-- Continue Button -->
-              <button @click="handleContinue" :disabled="selectedSeats.length === 0"
-                class="w-full py-3 rounded-lg font-semibold text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                :class="selectedSeats.length > 0 ? 'bg-orange-500 hover:bg-orange-600 shadow-lg hover:shadow-xl' : 'bg-gray-400'">
+              <button @click="handleContinue"
+                class="w-full py-3 rounded-lg font-semibold text-white transition-all duration-200 bg-orange-500 hover:bg-orange-600 shadow-lg hover:shadow-xl"
+                >
                 Continue
               </button>
+              <div v-if="showSeatError" class="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+                Please select your seat
+              </div>
             </div>
           </div>
         </div>
@@ -216,6 +214,7 @@ const emit = defineEmits<{
 
 const scheduleStore = useScheduleStore()
 const selectedSeats = ref<SeatCol[]>([])
+const showSeatError = ref(false)
 const isLoadingSeatLayout = ref(false)
 const apiSeatData = ref<string>('')
 const apiUnavailableSeats = ref<UnavailableSeatInfo[]>([])
@@ -319,6 +318,10 @@ const unavailableSeatsComputed = computed<UnavailableSeatInfo[]>(() => {
 
 const totalFare = computed(() => {
   return selectedSeats.value.length * props.scheduleInfo.price
+})
+
+const selectedSeatLabels = computed(() => {
+  return selectedSeats.value.map(seat => seat.label).join(', ')
 })
 
 const seatTypeToUse = computed(() => {
@@ -519,17 +522,30 @@ const toggleSeat = (seat: SeatCol) => {
   } else {
     selectedSeats.value.push(seat)
   }
+  if (selectedSeats.value.length > 0) {
+    showSeatError.value = false
+  }
 }
 
 const closeModal = () => {
   selectedSeats.value = []
+  showSeatError.value = false
   emit('close')
 }
 
 const handleContinue = () => {
-  if (selectedSeats.value.length > 0) {
-    emit('continue', selectedSeats.value)
-    router.push('/passenger')
+  if (selectedSeats.value.length === 0) {
+    showSeatError.value = true
+    return
   }
+  const seatLabels = selectedSeats.value.map(seat => seat.label)
+  localStorage.setItem('selectedSeats', seatLabels.join(','))
+  emit('continue', selectedSeats.value)
+  router.push({
+    path: '/passenger',
+    query: {
+      seats: seatLabels.join(',')
+    }
+  })
 }
 </script>
