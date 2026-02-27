@@ -5,11 +5,15 @@ import { useFlashSaleStore } from '~/stores/useFlashSaleStore'
 
 // Initialize the flash sale store
 const flashSaleStore = useFlashSaleStore()
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 // Fetch flash sales on component mount
 onMounted(() => {
-    flashSaleStore.fetchFlashSales()
+    flashSaleStore.fetchFlashSales(locale.value)
+})
+
+watch(locale, (newLocale) => {
+    flashSaleStore.fetchFlashSales(newLocale)
 })
 
 const showAll = ref(false)

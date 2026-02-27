@@ -34,7 +34,13 @@ export const useApi = () => {
     const params = new URLSearchParams()
     Object.entries(data).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
-        if (typeof value === 'object') {
+        if (Array.isArray(value)) {
+          value.forEach((item) => {
+            if (item !== undefined && item !== null) {
+              params.append(key, String(item))
+            }
+          })
+        } else if (typeof value === 'object') {
           params.append(key, JSON.stringify(value))
         } else {
           params.append(key, String(value))

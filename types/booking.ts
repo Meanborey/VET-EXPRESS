@@ -24,6 +24,39 @@ export interface BookingState {
   destinations: Destination[]
 }
 
+export interface ConfirmBookingRequest {
+  boardingPointId: number[]
+  dropOffId: number[]
+  journeyDate: string[]
+  journeyId: string[]
+  journeyType: number
+  nationally: number
+  seatGender: number[]
+  seatJourney: string[]
+  seatNum: string[]
+  seatPrice: number[]
+  totalAmount: number
+  totalDiscount: number
+  totalSeat: string
+  couponCode?: string
+  email?: string
+  isUseLuckyDraw?: number
+  packageTravelCode?: string
+  seatDob?: string[]
+  seatName?: string[]
+  seatNationallyId?: number[]
+  seatPassport?: string[]
+  session?: string
+  telephone?: string
+}
+
+export interface ConfirmBookingResponse {
+  bookingCode?: string
+  paymentUrl?: string
+  message?: string
+  [key: string]: unknown
+}
+
 export interface Destination {
   id: string
   name: string

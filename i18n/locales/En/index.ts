@@ -14,7 +14,7 @@ export default {
   "gallery": "Gallery",
   "blog": "Blog",
   "subsidiary": "Subsidiary",
-  "signIn": "Sign In",
+  "signIn": "Sign In Account",
   "companyName": "Vireak Buntham Express",
   "email": "Email",
   "tel": "Tel",

@@ -1,6 +1,10 @@
 import { defineStore } from 'pinia';
-import type { FlashSaleCard, FlashSaleApiResponse } from '~/types/flashSale';
-import type { BaseApiResponse } from '~/types/api';
+import type {
+  FlashSaleCard,
+  FlashSaleRequestPayload,
+  PromotionListApiResponse,
+  RawFlashSaleItem
+} from '~/types/flashSale';
 
 export const useFlashSaleStore = defineStore('flashSale', {
   state: () => ({
@@ -15,108 +19,81 @@ export const useFlashSaleStore = defineStore('flashSale', {
   },
 
   actions: {
-    // Step 4 & 5: Pinia action → API call (POST form-urlencoded + Bearer)
-    async fetchFlashSales() {
-      this.loading = true;
-      this.error = null;
+    toNumber(value: string | number | undefined): number {
+      if (typeof value === 'number') return value
+      if (typeof value === 'string' && value.trim() !== '') {
+        const parsed = Number(value)
+        return Number.isNaN(parsed) ? 0 : parsed
+      }
+      return 0
+    },
 
-      try {
-        const { post } = useApi();
-        const response = await post<BaseApiResponse<FlashSaleCard[]>>('/flash-sales');
-        
-        // Step 6: State updated → Step 7: UI reactive
-        if (response?.data?.data) {
-          this.flashSales = response.data.data;
-        } else {
-          const dummyData = await this.getDummyData();
-          this.flashSales = dummyData.flashSales;
-        }
-      } catch (err) {
-        this.error = err instanceof Error ? err.message : 'Failed to fetch flash sales';
-        console.error('API Error, using dummy data:', err);
-        const dummyData = await this.getDummyData();
-        this.flashSales = dummyData.flashSales;
-      } finally {
-        this.loading = false;
+    buildPeriod(item: RawFlashSaleItem): string {
+      if (item.applyPeriod) return item.applyPeriod
+      if (item.period) return item.period
+
+      const from = item.startDate || item.fromDate
+      const to = item.endDate || item.toDate
+
+      if (from && to) return `${from} - ${to}`
+      return from || to || '-'
+    },
+
+    normalizeFlashSale(item: RawFlashSaleItem, index: number): FlashSaleCard {
+      const currentPrice = this.toNumber(
+        item.promotionPrice ?? item.promotionPriceForeigner ?? item.newPrice ?? item.discountPrice ?? item.price
+      )
+      const oldPrice = this.toNumber(item.oldPrice ?? item.originalPrice ?? item.price ?? item.priceForeigner)
+
+      return {
+        id: this.toNumber(item.id) || index + 1,
+        title: item.description || item.title || item.name || item.promotionTitle || item.routeName || 'Promotion',
+        period: this.buildPeriod(item),
+        price: currentPrice,
+        oldPrice: oldPrice > 0 ? oldPrice : currentPrice,
+        icon: item.icon || item.image || item.logo || '/images/vireak-buntham.png'
       }
     },
 
-    // Dummy data simulation (acts as API response)
-    async getDummyData(): Promise<FlashSaleApiResponse> {
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 300));
+    async fetchFlashSales(lang: string) {
+      this.loading = true;
+      this.error = null;
+      this.flashSales = [];
 
-      // Dynamic import for the image
-      const brandIcon = '/images/vireak-buntham.png';
+      try {
+        const { post } = useApi();
 
-      return {
-        flashSales: [
-          {
-            id: 1,
-            title: 'Phnom Penh to Poi Pet (07:00)',
-            period: '2025-03-05 to 2035-03-31',
-            price: 18,
-            oldPrice: 23,
-            icon: brandIcon,
-          },
-          {
-            id: 2,
-            title: 'Phnom Penh to Poi Pet (07:00)',
-            period: '2025-03-05 to 2035-03-31',
-            price: 20,
-            oldPrice: 23,
-            icon: brandIcon,
-          },
-          {
-            id: 3,
-            title: 'Battambang to Bangkok (08:00)',
-            period: '2024-06-01 to 2025-12-31',
-            price: 23,
-            oldPrice: 27,
-            icon: brandIcon,
-          },
-          {
-            id: 4,
-            title: 'Bangkok to Poi Pet (11:00)',
-            period: '2023-11-17 to 2033-11-30',
-            price: 11,
-            oldPrice: 15,
-            icon: brandIcon,
-          },
-          {
-            id: 5,
-            title: 'Siem Reap to Phnom Penh (09:00)',
-            period: '2024-05-01 to 2025-10-31',
-            price: 15,
-            oldPrice: 20,
-            icon: brandIcon,
-          },
-          {
-            id: 6,
-            title: 'Phnom Penh to Ho Chi Minh City (10:00)',
-            period: '2024-07-01 to 2025-12-31',
-            price: 25,
-            oldPrice: 30,
-            icon: brandIcon,
-          },
-          {
-            id: 7,
-            title: 'Siem Reap to Bangkok (12:00)',
-            period: '2024-08-01 to 2025-11-30',
-            price: 30,
-            oldPrice: 35,
-            icon: brandIcon,
-          },
-          {
-            id: 8,
-            title: 'Phnom Penh to Sihanoukville (14:00)',
-            period: '2024-09-01 to 2025-12-31',
-            price: 12,
-            oldPrice: 18,
-            icon: brandIcon,
-          },
-        ],
-      };
-    },
+        const payload = {
+          type: 1,
+          lang
+        } satisfies FlashSaleRequestPayload
+
+        const response = await post<PromotionListApiResponse>('/promotion/list', payload);
+
+        if (!response) {
+          throw new Error('No response from promotion/list API')
+        }
+
+        const responseData = response.data
+        console.log('promotion/list response:', responseData)
+        const bodyData = Array.isArray(responseData?.body) ? responseData.body : []
+        const directData = Array.isArray(responseData?.data) ? responseData.data : []
+
+        const promotions = bodyData.length > 0 ? bodyData : directData
+
+        if (!Array.isArray(promotions) || promotions.length === 0) {
+          this.flashSales = []
+          return
+        }
+
+        this.flashSales = promotions.map((item, index) => this.normalizeFlashSale(item, index))
+      } catch (err) {
+        this.error = err instanceof Error ? err.message : 'Failed to fetch flash sales';
+        this.flashSales = [];
+        console.error('Error fetching flash sales:', err);
+      } finally {
+        this.loading = false;
+      }
+    }
   },
 });

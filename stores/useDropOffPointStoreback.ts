@@ -34,7 +34,7 @@ export interface DropOffPoint {
   raw?: ApiDropOffPoint
 }
 
-export const useDropOffPointStore = defineStore('dropOffPoint', {
+export const useDropOffPointStoreback = defineStore('dropOffPointBack', {
   state: () => ({
     dropOffPoints: [] as DropOffPoint[],
     loading: false,
@@ -79,10 +79,11 @@ export const useDropOffPointStore = defineStore('dropOffPoint', {
           boardingPointId !== undefined && boardingPointId !== null && String(boardingPointId).trim()
             ? String(boardingPointId)
             : ''
-
+        
         const requestDate =
           date || (typeof localStorage !== 'undefined' ? localStorage.getItem('dateFrom') || '' : '')
-
+          
+        // Also get schedule/journey ID as fallback
         const scheduleId =
           scheduleIdFallback !== undefined && scheduleIdFallback !== null && String(scheduleIdFallback).trim()
             ? String(scheduleIdFallback)

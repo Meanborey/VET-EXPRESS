@@ -113,14 +113,68 @@ const selectedScheduleInfo = ref({
   routeType: '',
   vehicleType: '',
   departure: '',
+  departureTime: '',
+  arrivalTime: '',
   price: 0
 })
+
+const formatTime = (time: string): string => {
+  if (!time) return ''
+
+  if (/^\d{2}:\d{2}$/.test(time)) {
+    return time
+  }
+
+  if (/^\d{2}:\d{2}:\d{2}$/.test(time)) {
+    return time.substring(0, 5)
+  }
+
+  try {
+    const date = new Date(time)
+    if (!isNaN(date.getTime())) {
+      const hours = date.getHours().toString().padStart(2, '0')
+      const minutes = date.getMinutes().toString().padStart(2, '0')
+      return `${hours}:${minutes}`
+    }
+  } catch {
+    // ignore parse error and fall back to regex extraction
+  }
+
+  const timeMatch = time.match(/(\d{1,2}):(\d{2})/)
+  if (timeMatch) {
+    const hours = timeMatch[1]?.padStart(2, '0') ?? ''
+    const minutes = timeMatch[2] ?? ''
+    return `${hours}:${minutes}`
+  }
+
+  return time
+}
 
 const searchParams = ref<SearchParams>({
   from: (route.query.from as string) || destinationStore.searchParams.origin || '',
   to: (route.query.to as string) || destinationStore.searchParams.destination || '',
   departure: (route.query.departDate as string) || destinationStore.searchParams.departDate || ''
 })
+
+const getStoredValue = (key: string): string => {
+  if (typeof localStorage === 'undefined') return ''
+  return localStorage.getItem(key) || ''
+}
+
+const resolvedReturnDate = computed(() => {
+  const raw =
+    (route.query.returnDate as string) ||
+    destinationStore.searchParams.returnDate ||
+    getStoredValue('returnDate') ||
+    ''
+
+  const normalized = raw.trim()
+  if (!normalized || normalized === 'undefined' || normalized === 'null') return ''
+  return normalized
+})
+
+const hasReturnTrip = computed(() => !!resolvedReturnDate.value)
+const tripType = computed(() => hasReturnTrip.value ? 'round-trip' : 'one-way')
 
 // Get schedules from store
 const schedules = computed(() => scheduleStore.getAllSchedules)
@@ -147,8 +201,10 @@ const handleBookNow = (schedule: any) => {
   selectedScheduleInfo.value = {
     routeTitle: `${searchParams.value.from} - ${searchParams.value.to}`,
     routeType: schedule.routeInfo || '(Direct)',
-    vehicleType: schedule.vehicleType || schedule.vehicleName,
+    vehicleType: schedule.transportationType || schedule.vehicleName || String(schedule.vehicleType || ''),
     departure: searchParams.value.departure,
+    departureTime: formatTime(String(schedule.departure || '')),
+    arrivalTime: formatTime(String(schedule.arrival || '')),
     price: schedule.price
   }
 
@@ -162,16 +218,52 @@ const handleSeatContinue = (selectedSeats: any[]) => {
   // Close modal
   showSeatModal.value = false
 
-  // Navigate to booking page with selected seats and schedule info
+  const selectedSeatLabels = selectedSeats.map(s => s.label).join(',')
+  const totalFare = (selectedSeats.length * currentSchedule.value?.price).toFixed(2)
+  const outboundDepartureTime = formatTime(String(currentSchedule.value?.departure || ''))
+  const outboundArrivalTime = formatTime(String(currentSchedule.value?.arrival || ''))
+  const outboundVehicleType =
+    currentSchedule.value?.transportationType ||
+    currentSchedule.value?.vehicleName ||
+    String(currentSchedule.value?.vehicleType || '')
+
+  if (hasReturnTrip.value) {
+    router.push({
+      path: '/schedulelistback',
+      query: {
+        tripType: tripType.value,
+        from: searchParams.value.from,
+        fromId: (route.query.fromId as string) || (route.query.destinationFrom as string) || destinationStore.searchParams.destinationFrom || undefined,
+        to: searchParams.value.to,
+        toId: (route.query.toId as string) || (route.query.destinationTo as string) || destinationStore.searchParams.destinationTo || undefined,
+        departDate: searchParams.value.departure,
+        returnDate: resolvedReturnDate.value,
+        outboundScheduleId: currentSchedule.value?.id,
+        outboundSeats: selectedSeatLabels,
+        outboundTotalFare: totalFare,
+        outboundVehicleType,
+        outboundDepartureTime,
+        outboundArrivalTime
+      }
+    })
+    return
+  }
+
+  // Navigate to passenger page with selected seats and schedule info
   router.push({
-    path: '/booking',
+    path: '/passenger',
     query: {
+      tripType: tripType.value,
       scheduleId: currentSchedule.value?.id,
       from: searchParams.value.from,
       to: searchParams.value.to,
       departDate: searchParams.value.departure,
-      seats: selectedSeats.map(s => s.label).join(','),
-      totalFare: (selectedSeats.length * currentSchedule.value?.price).toFixed(2)
+      seats: selectedSeatLabels,
+      totalFare: totalFare,
+      vehicleType: outboundVehicleType,
+      departureTime: outboundDepartureTime,
+      arrivalTime: outboundArrivalTime,
+      returnDate: resolvedReturnDate.value || undefined
     }
   })
 }
@@ -262,7 +354,7 @@ onMounted(async () => {
       destination: searchParams.value.to,
       destinationTo: toId,
       departDate: searchParams.value.departure,
-      returnDate: (route.query.returnDate as string) || '',
+      returnDate: (route.query.returnDate as string) || getStoredValue('returnDate') || '',
       nationally: nationally,
       type: type
     })

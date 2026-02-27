@@ -1,5 +1,12 @@
 import { defineStore } from 'pinia'
-import type { Booking, BookingForm, BookingState, Destination } from '~/types/booking'
+import type {
+    Booking,
+    BookingForm,
+    BookingState,
+    ConfirmBookingRequest,
+    ConfirmBookingResponse,
+    Destination
+} from '~/types/booking'
 import type { BaseApiResponse } from '~/types/api'
 
 export const useBookingStore = defineStore('booking', {
@@ -91,6 +98,31 @@ export const useBookingStore = defineStore('booking', {
     },
 
     actions: {
+        async confirmBooking(bookingData: ConfirmBookingRequest): Promise<ConfirmBookingResponse | null> {
+            console.log('Confirming booking with data:', bookingData)
+            try {
+                const { post } = useApi()
+                const response = await post<{
+                    data?: ConfirmBookingResponse
+                    body?: ConfirmBookingResponse
+                } & BaseApiResponse<ConfirmBookingResponse>>('/booking/confirm', bookingData as unknown as Record<string, unknown>)
+
+                console.log('API Response confirming booking:', response)
+                if (response?.data?.body) {
+                    return response.data.body
+                }
+
+                if (response?.data?.data) {
+                    return response.data.data
+                }
+
+                return null
+            } catch (err) {
+                console.error('API Error confirming booking:', err)
+                return null
+            }
+        },
+
         // Step 4 & 5: Pinia action → API call (POST form-urlencoded + Bearer)
         async createBooking(bookingData: BookingForm, vehicleId: string, vehicleName: string): Promise<Booking> {
             try {

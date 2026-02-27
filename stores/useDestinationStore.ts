@@ -106,6 +106,7 @@ export const useDestinationStore = defineStore('destination', {
             if (typeof localStorage !== 'undefined') {
                 if (params.destinationFrom) localStorage.setItem('departureFromId', params.destinationFrom)
                 if (params.destinationTo) localStorage.setItem('destinationToId', params.destinationTo)
+                if (params.returnDate !== undefined) localStorage.setItem('returnDate', params.returnDate || '')
                 if (params.type) localStorage.setItem('types', params.type)
                 if (params.nationally) localStorage.setItem('nationally', params.nationally)
             }

@@ -161,7 +161,6 @@ import BED2 from '@/assets/images/seats/BED 2.png'
 import BED3 from '@/assets/images/seats/BED 3.png'
 import hostessSeat from '@/assets/images/seats/hostess.png'
 import captainSeat from '@/assets/images/seats/captain.png'
-const router = useRouter()
 
 interface SeatCol {
   attr: {
@@ -188,6 +187,8 @@ interface ScheduleInfo {
   routeType: string
   vehicleType: string
   departure: string
+  departureTime?: string
+  arrivalTime?: string
   price: number
 }
 
@@ -540,12 +541,16 @@ const handleContinue = () => {
   }
   const seatLabels = selectedSeats.value.map(seat => seat.label)
   localStorage.setItem('selectedSeats', seatLabels.join(','))
-  emit('continue', selectedSeats.value)
-  router.push({
-    path: '/passenger',
-    query: {
-      seats: seatLabels.join(',')
-    }
-  })
+  localStorage.setItem('selectedTotalFare', totalFare.value.toFixed(2))
+  localStorage.setItem('selectedTripPrice', Number(props.scheduleInfo.price || 0).toFixed(2))
+  localStorage.setItem('selectedRouteTitle', props.scheduleInfo.routeTitle || '')
+  localStorage.setItem('selectedVehicleType', props.scheduleInfo.vehicleType || '')
+  localStorage.setItem('selectedDepartureDate', props.scheduleInfo.departure || '')
+  localStorage.setItem('selectedDepartureTime', props.scheduleInfo.departureTime || '')
+  localStorage.setItem('selectedArrivalTime', props.scheduleInfo.arrivalTime || '')
+  const selectedSeatsPayload = [...selectedSeats.value]
+  selectedSeats.value = []
+  showSeatError.value = false
+  emit('continue', selectedSeatsPayload)
 }
 </script>
