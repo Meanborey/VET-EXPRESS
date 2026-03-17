@@ -51,13 +51,14 @@ async function onSubmit() {
                     </div>
                 </div>
 
-                <p v-if="authStore.error" class="text-red-600 text-sm">{{ authStore.error }}</p>
+                <p class="text-red-600 text-sm text-end"><NuxtLink to="/auth/forgot_password" class="text-red-600">Forgot password?</NuxtLink></p>
 
                 <button type="submit"
                     class="w-full bg-orange-600 text-white rounded-md py-3 font-bold disabled:opacity-60"
                     :disabled="authStore.loading">
                     {{ authStore.loading ? 'Signing in...' : 'Login' }}
                 </button>
+                <p>Don't have an account? <NuxtLink to="/auth/register" class="text-orange-600"> Register</NuxtLink></p>
             </form>
         </div>
     </div>

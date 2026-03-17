@@ -1,9 +1,12 @@
 <script setup lang="ts">
 const { t, locale, setLocale } = useI18n()
+const authStore = useAuthStore()
+const userStore = useUserStore()
+const router = useRouter()
 
 const navigation = computed(() => [
   { label: t('about'), to: '/aboutUs' },
-  { label: t('travelPackage'), to: '/travel-package' },
+  { label: t('travelPackage'), to: '/travel_package' },
   { label: t('vehicleRental'), to: '/vehicle-rental' },
   { label: t('gallery'), to: '/gallery' },
   { label: t('blog'), to: '/blogs' },
@@ -12,6 +15,28 @@ const navigation = computed(() => [
 
 const subsidiaryDropdownOpen = ref(false)
 const languageDropdownOpen = ref(false)
+const profileDropdownOpen = ref(false)
+
+onMounted(() => {
+  authStore.restoreAuth()
+})
+
+watch(
+  () => authStore.token,
+  (token) => {
+    const normalizedToken = String(token || '').trim()
+
+    if (!normalizedToken) {
+      userStore.clearProfile()
+      return
+    }
+
+    if (!userStore.hasProfile) {
+      userStore.fetchProfile(normalizedToken).catch(() => undefined)
+    }
+  },
+  { immediate: true }
+)
 
 type LanguageKey = 'en' | 'cn' 
 
@@ -34,6 +59,10 @@ const toggleLanguage = () => {
   languageDropdownOpen.value = !languageDropdownOpen.value
 }
 
+const toggleProfileDropdown = () => {
+  profileDropdownOpen.value = !profileDropdownOpen.value
+}
+
 const selectLanguage = (language: LanguageKey) => {
   setLocale(language)
   languageDropdownOpen.value = false
@@ -44,6 +73,19 @@ const scrollToContact = () => {
   if (element) {
     element.scrollIntoView({ behavior: 'smooth' })
   }
+}
+
+const displayName = computed(() => {
+  const username = String(userStore.profile?.name || authStore.user?.name || '').trim()
+  if (username) return username.length > 6 ? `${username.slice(0, 3)}..` : username
+  return username || t('user') || 'User'
+})
+
+const handleLogout = async () => {
+  await authStore.logoutProfile()
+  userStore.clearProfile()
+  profileDropdownOpen.value = false
+  router.push('/')
 }
 
 // Image error handling
@@ -119,11 +161,41 @@ const onImageError = (event: Event) => {
           </div>
         </div>
       </div>
-      <!-- Sign In Button -->
-      <NuxtLink to="/auth/login"
-        class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
-        {{ t('signIn') }}
-      </NuxtLink>
+      <!-- Sign In Button or Profile Dropdown -->
+      <div v-if="!authStore.isAuthenticated">
+        <NuxtLink to="/auth/login"
+          class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors">
+          {{ t('signIn') }}
+        </NuxtLink>
+      </div>
+      <div v-else class="relative">
+        <button
+          @click="toggleProfileDropdown"
+          class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors min-w-20">
+          {{ displayName }} <i class="fa-solid fa-chevron-down"></i>
+        </button>
+        <div
+          v-if="profileDropdownOpen"
+          class="absolute top-full right-0 mt-3 bg-white border border-gray-200 rounded-md shadow-lg py-2 min-w-56 z-50"
+        >
+          <NuxtLink :to="`/auth/user_detail/${userStore.profile?.id}`" class="flex items-center justify-between px-6 py-3 text-sm text-gray-700 hover:bg-gray-100" @click="profileDropdownOpen = false">
+            <span>{{ t('profileAccount') || 'Profile Account' }}</span>
+            <span>›</span>
+          </NuxtLink>
+          <NuxtLink to="/package_history" class="flex items-center justify-between px-6 py-3 text-sm text-gray-700 hover:bg-gray-100" @click="profileDropdownOpen = false">
+            <span>{{ t('travelPackageHistory') || 'Travel Package History' }}</span>
+            <span>›</span>
+          </NuxtLink>
+          <NuxtLink to="/ticket_history" class="flex items-center justify-between px-6 py-3 text-sm text-gray-700 hover:bg-gray-100" @click="profileDropdownOpen = false">
+            <span>{{ t('ticketHistory') || 'Ticket History' }}</span>
+            <span>›</span>
+          </NuxtLink>
+          <button @click="handleLogout" class="w-full text-left flex items-center justify-between px-6 py-3 text-sm text-gray-700 hover:bg-gray-100">
+            <span>{{ t('logOut') || 'Log Out' }}</span>
+            <span>›</span>
+          </button>
+        </div>
+      </div>
     </div>
   </nav>
 </template>

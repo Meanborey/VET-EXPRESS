@@ -964,6 +964,11 @@ const processPayment = async () => {
       })
       .filter((id): id is number => id !== null)
 
+   const sessionToken = (() => {
+      if (typeof localStorage === 'undefined') return ''
+      return String(localStorage.getItem('token') || '').trim()
+   })()
+
    const payload: ConfirmBookingRequest = {
       boardingPointId: isRoundTrip.value && returnBoardingPointId !== null ? [boardingPointId, returnBoardingPointId] : [boardingPointId],
       dropOffId: isRoundTrip.value && returnDropOffId !== null ? [dropOffId, returnDropOffId] : [dropOffId],
@@ -998,7 +1003,8 @@ const processPayment = async () => {
             })
             .filter((id): id is number => id !== null)
          return ids.length > 0 ? ids : undefined
-      })()
+      })(),
+      session: sessionToken || undefined
    }
 
    const firstPassenger = passengers.value[0]

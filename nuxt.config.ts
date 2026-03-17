@@ -9,7 +9,10 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       apiBaseUrl: process.env.NUXT_PUBLIC_API_BASE_URL ,
-      apiToken: process.env.NUXT_PUBLIC_API_TOKEN
+      apiToken: process.env.NUXT_PUBLIC_API_TOKEN,
+      upload: process.env.NUXT_PUBLIC_URL_BASE_IMAGE_UPLOAD_USER,
+      token: process.env.NUXT_PUBLIC_URL_IMAGE_TOKEN_USER,
+      urlImg: process.env.NUXT_PUBLIC_URL_IMAGE_BASE
     }
   },
 
